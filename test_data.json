@@ -1,0 +1,61 @@
+{
+    "id": "95d20c16a3559d29d88f3c2ac48eb7e4",
+    "received_at": "2025-02-07 04:00:12",
+    "processed_at": "2025-02-07 04:00:13",
+    "mail_attachments": [
+        {
+            "edwards_order_number": "SO-0337677",
+            "customer_po": "8636-68790-S1",
+            "shipment_date": "02/06/2025",
+            "tracking_number": "1Z4598130350217646",
+            "ship_via_description": "UPS RES",
+            "stock_item": "3500 007 36 R",
+            "upc": "888950193436",
+            "shipto_name": "Centricity",
+            "shipto_address": "2325 209th Pl NE",
+            "shipto_address2": "",
+            "shipto_city": "Sammamish",
+            "shipto_state": "WA",
+            "shipto_zipcode": "98074",
+            "item_qty": "1.0",
+            "edwards_customer_number": "E0769",
+            "package_id": ""
+        },
+        {
+            "edwards_order_number": "SO-0337677",
+            "customer_po": "8636-68790-S1",
+            "shipment_date": "02/06/2025",
+            "tracking_number": "1Z4598130350217646",
+            "ship_via_description": "UPS RES",
+            "stock_item": "2793 079 30 UL",
+            "upc": "888950630023",
+            "shipto_name": "Centricity",
+            "shipto_address": "2325 209th Pl NE",
+            "shipto_address2": "",
+            "shipto_city": "Sammamish",
+            "shipto_state": "WA",
+            "shipto_zipcode": "98074",
+            "item_qty": "1.0",
+            "edwards_customer_number": "E0769",
+            "package_id": ""
+        },
+        {
+            "edwards_order_number": "SO-0338194",
+            "customer_po": "8636-68802",
+            "shipment_date": "02/06/2025",
+            "tracking_number": "1Z4598131289134253",
+            "ship_via_description": "UPS 3DAY",
+            "stock_item": "8793 079 8 UL",
+            "upc": "888950665070",
+            "shipto_name": "Centricity",
+            "shipto_address": "2152 S. Holland St",
+            "shipto_address2": "",
+            "shipto_city": "Lakewood",
+            "shipto_state": "CO",
+            "shipto_zipcode": "80227",
+            "item_qty": "1.0",
+            "edwards_customer_number": "E0769",
+            "package_id": ""
+        }
+    ]
+}
