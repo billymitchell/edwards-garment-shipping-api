@@ -22,8 +22,8 @@ This project processes shipment information received from Edwards and updates or
 
 ## Prerequisites
 
-- Node.js (v12 or later)
-- npm
+- [Node.js](https://nodejs.org/) (v12 or later)
+- [npm](https://www.npmjs.com/)
 
 ## Setup
 
