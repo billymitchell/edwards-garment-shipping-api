@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const testing = 'true';
+const testing = 'false';
 let inputData = {};
 
 if (testing) {
@@ -157,6 +157,7 @@ async function processShipment(shipment) {
   }
   const { url: storeUrl, apiKey } = storeInfo;
 
+  // Look up order details.
   const orderData = await orderLookup(orderId, storeUrl, apiKey);
   if (!orderData.line_items) {
     throw new Error(
@@ -169,89 +170,111 @@ async function processShipment(shipment) {
     shippingMethodsMapping[shipment.ship_via_description] ||
     shipment.ship_via_description;
 
-  // Test each variation of the SKU against each order item.
-  let matched = false;
+  // Accumulate matching items so they can be bundled in one request.
+  const matchedItems = [];
   for (const itemInOrder of orderData.line_items) {
     const orderSkuVariants = getSkuVariants(itemInOrder.final_sku);
     // Check if any variant of the shipment SKU matches any variant of the order SKU.
     const found = shipmentVariants.some(skuVar => orderSkuVariants.includes(skuVar));
     if (found) {
-      matched = true;
-      const updateOrderPayload = JSON.stringify({
-        shipment: {
-          tracking_number: shipment.tracking_number,
-          send_shipping_confirmation: true,
-          ship_date: shipment.shipment_date,
-          note: "Updated Via Edwards Shipment Doc Through Centricity API",
-          shipping_method: mappedShippingMethod,
-          line_items: [
-            {
-              id: itemInOrder.id,
-              quantity: Math.round(Number(shipment.item_qty)),
-            },
-          ],
-        },
+      matchedItems.push({
+        id: itemInOrder.id,
+        quantity: Math.round(Number(shipment.item_qty)),
       });
-      await updateOrder(
-        orderId,
-        storeUrl,
-        apiKey,
-        updateOrderPayload,
-        itemInOrder.id,
-        shipment.tracking_number
-      );
     }
   }
-  if (!matched) {
+  if (matchedItems.length === 0) {
     throw new Error(
       `processShipment: No matching SKU found for shipment with SKU variations: ${shipmentVariants.join(" | ")}`
     );
   }
+  
+  // After accumulating matching items into the "matchedItems" array,
+  // we create a payload to update the related order with shipping details.
+  const updateOrderPayload = JSON.stringify({
+    shipment: {
+      // The tracking number for the shipment
+      tracking_number: shipment.tracking_number,
+      // Flag to indicate that a shipping confirmation should be sent
+      send_shipping_confirmation: true,
+      // The date the shipment occurred
+      ship_date: shipment.shipment_date,
+      // A note detailing how this update was performed
+      note: "Updated Via Edwards Shipment Doc Through Centricity API",
+      // The converted shipping method (mapped from the incoming value)
+      shipping_method: mappedShippingMethod,
+      // The list of all matching order items that share the same shipment (bundled together)
+      line_items: matchedItems,
+    },
+  });
+
+  // The updateOrder function is called once per shipment
+  // (or per distinct tracking_number) to update multiple order items at once.
+  // The "bundled" identifier here indicates that multiple items have been combined
+  // into a single request.
+  await updateOrder(
+    orderId,            // The order ID to update
+    storeUrl,           // The store URL from storeMapping (includes API endpoint)
+    apiKey,             // The API key for authentication
+    updateOrderPayload, // The payload containing shipment details and line_items
+    "bundled",          // An identifier used for logging (indicates bundled items)
+    shipment.tracking_number // The tracking number for further logging/debugging
+  );
 }
 
 // Process all shipments sequentially and accumulate errors.
 async function processShipments() {
-  // Use a Set to deduplicate error messages.
+  // Create a Set to store unique error messages to avoid duplication.
   const errorSet = new Set();
   let parsedData;
 
+  // When testing mode is activated, we assume the test_data.json is already an object,
+  // otherwise, we try to parse the 'mailparser' property of the input data.
   if (testing) {
-    // In testing mode, assume inputData is already an object.
     parsedData = inputData;
   } else {
     try {
       parsedData = JSON.parse(inputData.mailparser);
     } catch (e) {
+      // If JSON parsing fails, throw an error with details.
       throw new Error(`processShipments: Error parsing inputData.mailparser - ${e.message}`);
     }
   }
 
+  // Check if the parsed data contains the 'mail_attachments' property,
+  // which holds an array of shipment objects. If missing, add an error.
   if (!parsedData.mail_attachments) {
     errorSet.add("processShipments: No mail_attachments found in inputData.");
   } else {
+    // Loop through each shipment in the mail attachments.
     const shipments = parsedData.mail_attachments;
     for (const shipment of shipments) {
       try {
+        // Process the shipment. If errors occur during processing, they will be caught below.
         await processShipment(shipment);
       } catch (e) {
-        // Log full error immediately.
+        // Log the full error immediately for debugging.
         console.error(e);
+        // Add the error message to our error set to report later.
         errorSet.add(e.message);
       }
     }
   }
 
-  // If errors occurred, aggregate them (each on a new line) and throw one error.
+  // After processing all shipments, if any unique errors occurred,
+  // aggregate them into a single message (each on a new line) and throw an error.
   if (errorSet.size > 0) {
     const combinedErrorMessage = Array.from(errorSet).join("\n");
+    // Log the combined errors for further inspection.
     console.error("Accumulated Errors:\n", combinedErrorMessage);
     throw new Error(`processShipments encountered errors:\n${combinedErrorMessage}`);
   }
 
+  // If no errors occurred, return success status.
   return { status: "successfully executed to the end" };
 }
 
-// Execute and wrap the async call so that Zapier (or Node) receives the error if any occur.
+// Execute processShipments() and catch any unhandled error to surface it.
 return processShipments().catch(error => {
   throw new Error(`Unhandled error:\n${error.message}`);
 });
