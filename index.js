@@ -32,6 +32,15 @@ const storeMapping = {
   // },
 };
 
+// Add your shipping methods mapping.
+const shippingMethodsMapping = {
+  "UPS RES": "UPS Ground",
+  "UPS GRND": "UPS Ground",
+  "FedEx GRND": "FedEx Ground",
+  "UPS 3DAY": "UPS 3 Day Select",
+  // add more mappings as needed
+};
+
 // Helper: Generate SKU candidate variants by splitting on spaces and dashes,
 // then joining the parts in different ways.
 function getSkuVariants(sku) {
@@ -68,6 +77,8 @@ async function orderLookup(orderId, storeUrl, apiKey) {
     headers: { Accept: "application/json" },
   });
   if (!response.ok) {
+    const text = await response.text();
+    console.error(`API Request Rejected: URL: ${url}, Status: ${response.status}, Response: ${text}`);
     throw new Error(
       `orderLookup: Response not ok for orderId ${orderId}, status: ${response.status}`
     );
@@ -85,6 +96,12 @@ async function updateOrder(orderId, storeUrl, apiKey, payload, itemId, trackingN
     body: payload,
   });
   if (!response.ok) {
+    const text = await response.text();
+    console.error(`API Request Rejected:
+      URL: ${url}
+      Status: ${response.status}
+      Payload: ${payload}
+      Response: ${text}`);
     throw new Error(
       `updateOrder: Response not ok for item ${itemId}, tracking: ${trackingNumber}, status: ${response.status}`
     );
@@ -120,8 +137,10 @@ async function processShipment(shipment) {
     );
   }
 
-  // Generate candidate SKU variants for the incoming shipment.
-  const shipmentVariants = getSkuVariants(shipment.stock_item);
+  // Add "TS" to the incoming SKU before generating variants.
+  const modifiedStockItem = `TS${shipment.stock_item}`;
+  // Generate candidate SKU variants for the modified shipment SKU.
+  const shipmentVariants = getSkuVariants(modifiedStockItem);
 
   // Validate storeId is numeric.
   if (!/^\d+$/.test(storeId)) {
@@ -145,6 +164,11 @@ async function processShipment(shipment) {
     );
   }
 
+  // Map incoming shipping_method to your internal shipping method.
+  const mappedShippingMethod =
+    shippingMethodsMapping[shipment.ship_via_description] ||
+    shipment.ship_via_description;
+
   // Test each variation of the SKU against each order item.
   let matched = false;
   for (const itemInOrder of orderData.line_items) {
@@ -159,7 +183,7 @@ async function processShipment(shipment) {
           send_shipping_confirmation: true,
           ship_date: shipment.shipment_date,
           note: "Updated Via Edwards Shipment Doc Through Centricity API",
-          shipping_method: shipment.ship_via_description,
+          shipping_method: mappedShippingMethod,
           line_items: [
             {
               id: itemInOrder.id,
