@@ -7,7 +7,6 @@ This project processes shipment information received from Edwards and updates or
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
 - [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
 - [Usage](#usage)
   - [Running in Testing Mode](#running-in-testing-mode)
   - [Running in Production Mode](#running-in-production-mode)
@@ -18,6 +17,7 @@ This project processes shipment information received from Edwards and updates or
   - [API Calls](#api-calls)
 - [Error Handling & Logging](#error-handling--logging)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Prerequisites
