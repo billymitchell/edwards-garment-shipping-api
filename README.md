@@ -1,34 +1,47 @@
-# Shipping API for Edwards
+# Express Server Project
 
-This project processes shipment information received from Edwards and updates orders accordingly. It maps incoming shipment details (such as SKUs and shipping methods) to internal representations, bundles order items sharing the same tracking number into a single request, and makes API calls to update orders with detailed shipment information.
+This is a simple Express server project that serves as a starting point for building web applications using Node.js and Express.
 
-## Table of Contents
+## Project Structure
 
-- [Prerequisites](#prerequisites)
-- [Setup](#setup)
-- [Environment Variables](#environment-variables)
-- [Usage](#usage)
-  - [Running in Testing Mode](#running-in-testing-mode)
-  - [Running in Production Mode](#running-in-production-mode)
-- [Code Overview](#code-overview)
-  - [Processing Shipments](#processing-shipments)
-  - [SKU Variants Generation](#sku-variants-generation)
-  - [Mapping Shipping Methods](#mapping-shipping-methods)
-  - [API Calls](#api-calls)
-- [Error Handling & Logging](#error-handling--logging)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+```
+express-server
+├── src
+│   ├── app.js          # Entry point of the application
+│   ├── routes          # Contains route definitions
+│   │   └── index.js    # Route setup
+│   └── controllers     # Contains request handlers
+│       └── index.js    # Controller definitions
+├── package.json        # NPM configuration file
+└── README.md           # Project documentation
+```
 
-## Prerequisites
+## Installation
 
-- [Node.js](https://nodejs.org/) (v12 or later)
-- [npm](https://www.npmjs.com/)
-
-## Setup
-
-1. **Clone the Repository**
-
-   ```bash
+1. Clone the repository:
+   ```
    git clone <repository-url>
-   cd Shipping-API/edwards
+   ```
+
+2. Navigate to the project directory:
+   ```
+   cd express-server
+   ```
+
+3. Install the dependencies:
+   ```
+   npm install
+   ```
+
+## Usage
+
+To start the server, run the following command:
+```
+npm start
+```
+
+The server will be running on `http://localhost:3000` by default.
+
+## Contributing
+
+Feel free to submit issues or pull requests for improvements or bug fixes.
