@@ -15,35 +15,48 @@ const shipmentMethodMapping = {
 };
 
 // Single route to process data
-app.post('/process', async (req, res) => {
+app.post('/', async (req, res) => {
     try {
+        // Validate the request body
         const data = req.body;
-
-        // Validate input data
         if (!data || typeof data.mail_attachments !== 'object') {
-            throw new Error("Invalid input: 'mail_attachments' must be an object.");
+            console.error("Invalid input: 'mail_attachments' must be an object.");
+            return res.status(400).json({
+                success: false,
+                message: "Invalid input: 'mail_attachments' must be an object."
+            });
         }
 
         const attachment = data.mail_attachments;
 
+        // Validate required fields in the attachment
         if (!attachment.tracking_number) {
-            throw new Error("Invalid attachment: Missing 'tracking_number'.");
+            console.error("Invalid attachment: Missing 'tracking_number'.");
+            return res.status(400).json({
+                success: false,
+                message: "Invalid attachment: Missing 'tracking_number'."
+            });
         }
 
+        // Parse carrier code and shipment method code from 'ship_via_description'
         const [carrier_code, shipment_method_code] = attachment.ship_via_description
             ? attachment.ship_via_description.split(' ')
-            : [null, null]; // Handle missing or invalid ship_via_description
+            : [null, null];
 
-        const shipment_method = shipmentMethodMapping[shipment_method_code] || shipment_method_code; // Map to full name or fallback
+        // Map shipment method code to a readable format
+        const shipment_method = shipmentMethodMapping[shipment_method_code] || shipment_method_code;
 
+        // Construct the payload to send to the external API
         const extractedData = {
-            source_id: attachment.customer_po || null, // Use customer_po as source_id
+            source_id: attachment.customer_po || null,
             tracking_number: attachment.tracking_number,
-            carrier_code: carrier_code || null, // Handle cases where split might fail
-            shipment_method: shipment_method || null // Handle cases where mapping might fail
+            carrier_code: carrier_code || null,
+            shipment_method: shipment_method || null
         };
 
-        // Submit the extracted shipment to the API
+        console.log("Payload prepared for external API:", extractedData);
+
+        // Send the payload to the external API
         const response = await fetch('https://orderdesk-single-order-ship-65ffd8ceba36.herokuapp.com/', {
             method: 'POST',
             headers: {
@@ -52,40 +65,45 @@ app.post('/process', async (req, res) => {
             body: JSON.stringify(extractedData)
         });
 
+        // Handle non-OK responses from the external API
         if (!response.ok) {
-            const errorResponse = await response.text(); // Read the response body
-            let formattedError;
+            const errorResponse = await response.text();
+            console.error("Error response from external API:", errorResponse);
 
-            // Try to parse the response body as JSON
+            let formattedError;
             try {
-                formattedError = JSON.parse(errorResponse); // Parse as JSON
+                formattedError = JSON.parse(errorResponse);
             } catch (parseError) {
-                // If parsing fails, keep the raw response as a string
                 formattedError = { raw: errorResponse };
             }
 
+            // Throw a detailed error object for further handling
             throw {
                 success: false,
-                message: `Failed to submit shipment`,
+                message: "Failed to submit shipment",
                 status: `${response.status} ${response.statusText}`,
                 requestBody: extractedData,
-                serverResponse: formattedError // Include as an object
+                serverResponse: formattedError
             };
         }
 
+        // Parse and return the successful response from the external API
         const responseData = await response.json();
-
+        console.log("Response received from external API:", responseData);
         res.json({ success: true, response: responseData });
+
     } catch (error) {
+        // Handle known errors with detailed responses
         if (error.success === false) {
-            // Return the structured error object
+            console.error("Known error occurred:", error);
             res.status(400).json(error);
         } else {
             // Handle unexpected errors
+            console.error("Unexpected error occurred:", error);
             res.status(500).json({
                 success: false,
                 message: "An unexpected error occurred",
-                error: error.message
+                error: error.message || "Unknown error"
             });
         }
     }
