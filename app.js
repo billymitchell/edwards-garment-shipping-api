@@ -1,7 +1,7 @@
 const express = require('express');
-
 const app = express();
 app.use(express.json()); // Middleware to parse JSON request bodies
+require('dotenv').config();
 
 // Shipment method mapping table
 const shipmentMethodMapping = {
@@ -110,7 +110,7 @@ app.post('/', async (req, res) => {
 });
 
 // Start the server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

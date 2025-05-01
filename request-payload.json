@@ -1,23 +1,23 @@
 {
-    "id": "120b9647af35f91aed79eac07ea1cc5e",
-    "received_at": "2025-04-23 03:00:13",
-    "processed_at": "2025-04-23 03:00:14",
+    "id": "459ae8e2f0247cec856283fc0739a345",
+    "received_at": "2025-04-30 20:00:10",
+    "processed_at": "2025-04-30 20:00:10",
     "mail_attachments": {
-        "edwards_order_number": "SO-0391424",
-        "customer_po": "8636-70924-S1",
-        "shipment_date": "04/22/2025",
-        "tracking_number": "1Z4598130387092560",
+        "edwards_order_number": "SO-0396857",
+        "customer_po": "43379-5022",
+        "shipment_date": "04/30/2025",
+        "tracking_number": "1Z4598130366797311",
         "ship_via_description": "UPS RES",
-        "stock_item": "6500 007 20 R",
-        "upc": "888950237468",
+        "stock_item": "3530 431 52 R",
+        "upc": "888950539715",
         "shipto_name": "Centricity",
-        "shipto_address": "68 Wood Duck Ct",
+        "shipto_address": "7214 Clift Avenue",
         "shipto_address2": "",
-        "shipto_city": "Upatoi",
-        "shipto_state": "GA",
-        "shipto_zipcode": "31829",
+        "shipto_city": "SHREVEPORT",
+        "shipto_state": "LA",
+        "shipto_zipcode": "71106",
         "item_qty": "1.0",
         "edwards_customer_number": "E0769",
-        "key_12076242": "00008889500004702986"
+        "key_12076242": "00008889500004765967"
     }
 }
