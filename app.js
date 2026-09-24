@@ -60,7 +60,8 @@ app.post('/', async (req, res) => {
         const response = await fetch('https://orderdesk-single-order-ship-65ffd8ceba36.herokuapp.com/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.SUBMIT_API_KEY
             },
             body: JSON.stringify(extractedData)
         });
